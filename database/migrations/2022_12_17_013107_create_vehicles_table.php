@@ -18,6 +18,8 @@ return new class extends Migration
             $table->text('name');
             $table->text('brand');
             $table->text('model');
+            $table->text('year');
+            $table->decimal('price', 12,2)->nullable();
             $table->text('photo')->nullable();
             $table->timestamps();
         });

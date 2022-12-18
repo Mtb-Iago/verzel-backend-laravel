@@ -27,6 +27,9 @@ class VehicleRequest extends FormRequest
                 "name" => "required",
                 "model" => "required",
                 "brand" => "required",
+                "year" => "required",
+                "price" => ['required'],
+                'photo' => ['image','nullable','max:2048']
         ];
     }
 }

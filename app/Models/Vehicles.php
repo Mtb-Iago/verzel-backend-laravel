@@ -13,6 +13,8 @@ class Vehicles extends Model
         'name',
         'model',
         'brand',
+        'year',
+        'price',
         'photo',
     ];
 }

@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\VehicleRequest;
 use App\Models\Vehicles;
+use Illuminate\Http\Client\ResponseSequence;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class VehicleController extends Controller
 {
@@ -15,7 +17,14 @@ class VehicleController extends Controller
      */
     public function index()
     {
-        return Vehicles::all();
+        try {
+            return Vehicles::all()->map(function ($vehicle) {
+                $vehicle->photo = Storage::url($vehicle->photo);
+                return $vehicle;
+            });
+        } catch (\Throwable $th) {
+            return response()->json(["status" => false, "message" => "Veículo não encontrado"], 401);
+        }
     }
 
     /**
@@ -26,8 +35,17 @@ class VehicleController extends Controller
      */
     public function store(VehicleRequest $request)
     {
-        $request->authorize();
-        return Vehicles::create($request->all());
+
+        try {
+            $request->authorize();
+            $data = $request->all();
+            if ($request->photo) {
+                $data['photo'] = $data['photo']->store('vehicles');
+            }
+            return Vehicles::create($data);
+        } catch (\Throwable $th) {
+            return response()->json(["status" => false, "message" => "Veículo não encontrado"], 401);
+        }
     }
 
     /**
@@ -44,7 +62,7 @@ class VehicleController extends Controller
 
     public function search($name)
     {
-        return Vehicles::where('name', 'like', '%'.$name.'%')->get();
+        return Vehicles::where('name', 'like', '%' . $name . '%')->get();
     }
     /**
      * Update the specified resource in storage.
@@ -55,7 +73,19 @@ class VehicleController extends Controller
      */
     public function update(Request $request, Vehicles $vehicle)
     {
-        return $vehicle->findOrFail($request->id)->update($request->all());
+        try {
+            $vehicle = $vehicle->findOrFail($request->id);
+            $data = $request->all();
+            if ($data['photo']) {
+                if ($vehicle['photo'] && Storage::exists($vehicle['photo'])) {
+                    Storage::delete($vehicle['photo']);
+                }
+                $data['photo'] = $request->photo->store('vehicles');
+            }
+            return $vehicle->update($data);
+        } catch (\Throwable $th) {
+            return response()->json(["status" => false, "message" => "Ooops Erro.."], 401);
+        }
     }
 
     /**
@@ -64,10 +94,19 @@ class VehicleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id, Vehicles $vehicle)
     {
-        $response = Vehicles::destroy($id);
+        try {
+            $vehicle = $vehicle->findOrFail($id);
 
-        return json_encode(response($response ? "Deletado com Sucesso" : "Veículo não encontrado"));
+            if ($vehicle['photo'] && Storage::exists($vehicle['photo'])) {
+                Storage::delete($vehicle['photo']);
+            }
+
+            Vehicles::destroy($id);
+            return response()->json(["status" => true, "message" => "Deletado com Sucesso"]);
+        } catch (\Throwable $th) {
+            return response()->json(["status" => false, "message" => "Veículo não encontrado"], 401);
+        }
     }
 }
