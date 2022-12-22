@@ -42,9 +42,10 @@ class VehicleController extends Controller
             if ($request->photo) {
                 $data['photo'] = $data['photo']->store('vehicles');
             }
-            return Vehicles::create($data);
+            $res = Vehicles::create($data);
+            return response()->json(["status" => false, "message" => "Veículo cadastrado com sucesso", "data" => $res], 200);
         } catch (\Throwable $th) {
-            return response()->json(["status" => false, "message" => "Veículo não encontrado"], 401);
+            return response()->json(["status" => false, "message" => "Erro ao cadastrar veículo"], 401);
         }
     }
 

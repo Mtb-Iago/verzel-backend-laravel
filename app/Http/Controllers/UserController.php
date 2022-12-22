@@ -31,10 +31,10 @@ class UserController extends Controller
             $request->authorize();
             $input = $request->all();
             $input['password'] = Hash::make($input['password']);
-
-            return User::create($input);
+            User::create($input);
+            return response()->json(["status" => true, "message" => "Usuário cadastrado com sucesso"], 200);
         } catch (\Throwable $th) {
-            return response()->json(["status" => false, "message" => "Veículo não encontrado"], 401);
+            return response()->json(["status" => false, "message" => "Error"], 401);
         }
     }
 

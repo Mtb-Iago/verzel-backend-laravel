@@ -27,8 +27,7 @@ class UserRequest extends FormRequest
         return [
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required',
-            'roles' => 'required'
+            'password' => 'required'
         ];
     }
 
@@ -43,7 +42,6 @@ class UserRequest extends FormRequest
             'email.email' => 'Por favor, preencha um email válido..',
             'email.unique' => 'Usuário já cadastrado..',
             'password.required' => 'A senha é obrigatória..',
-            'roles.required' => 'Defina o nível de usuário..',
         ];
     }
 }
