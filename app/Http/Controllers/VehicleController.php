@@ -17,14 +17,14 @@ class VehicleController extends Controller
      */
     public function index()
     {
-        try {
-            return Vehicles::all()->map(function ($vehicle) {
-                $vehicle->photo = Storage::url($vehicle->photo);
-                return $vehicle;
-            });
-        } catch (\Throwable $th) {
-            return response()->json(["status" => false, "message" => "Veículo não encontrado"], 401);
-        }
+        $vehicle = Vehicles::all();
+        $vehicle->map(function ($vehicle) {
+            $vehicle->photo = Storage::url($vehicle->photo);
+            return $vehicle;
+        });
+
+        return $vehicle;
+        // return response()->json(["status" => false, "message" => "Veículo não encontrado"], 401);
     }
 
     /**
@@ -85,7 +85,7 @@ class VehicleController extends Controller
             }
             return $vehicle->update($data);
         } catch (\Throwable $th) {
-            return response()->json(["status" => false, "message" => "Ooops Erro.."], 401);
+            return response()->json(["status" => false, "message" => "{$th->getMessage()}"], 401);
         }
     }
 
